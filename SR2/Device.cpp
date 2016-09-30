@@ -75,13 +75,13 @@ void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& ca
 			//for (auto idy = idx + 1; idy < mesh->verticesCount; ++idy) {
 				//if (idx == idy)	continue;
 				auto pt1 = project(mesh->vertices[idx], transform.transform_matrix);
-				//auto pt2 = project(mesh->vertices[idx+1], transform.transform_matrix);
+				auto pt2 = project(mesh->vertices[(idx+1) % mesh->verticesCount], transform.transform_matrix);
 
 				//printf("%f %f %f %f\n", mesh->vertices[idx].x, mesh->vertices[idx].y, mesh->vertices[idx].z, mesh->vertices[idx].w);
 				//printf("%f %f %f %f\n", pt.x, pt.y, pt.z, pt.w);
 
-				drawPoint(pt1);
-				//drawLine(pt1, pt2);
+				//drawPoint(pt1);
+				drawLine(pt1, pt2);
 			//}
 		}
 	}  
