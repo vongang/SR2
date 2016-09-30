@@ -20,7 +20,7 @@ Device::Device(uint32& _w, uint32& _h){
 }
 
 void Device::clear(float r, float g, float b, float a){
-	for (auto indx = 0; indx < buffsize; indx += 4) {
+	for (uint32 indx = 0; indx < buffsize; indx += 4) {
 		framebuff[indx] = r;
 		framebuff[indx + 1] = g;
 		framebuff[indx + 2] = b;
@@ -52,6 +52,15 @@ void Device::drawLine(const Point& pt0, const Point& pt1) {
 	drawLine(middle_pt, pt1);
 }
 
+void Device::drawBLine(const Point& pt0, const Point& pt1) {
+	float delta_x = pt1.x - pt0.x;
+	float delta_y = pt1.y - pt0.y;
+	float error = 0;
+	float delta_err = delta_y / delta_x;
+
+	int y = 0;
+}
+
 auto Device::project(const Point& point, const Mat4& transform_matrix) -> decltype(point) {
 	auto pt = point * transform_matrix;
 	pt.format();
@@ -62,8 +71,9 @@ auto Device::project(const Point& point, const Mat4& transform_matrix) -> declty
 
 void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera) {
 
-	transform.view_matrix.set_lookat(camera.eye, camera.at, camera.up);
+	transform.view_matrix.set_lookat(camera.position, camera.at, camera.up);
 	transform.projection_matrix.set_perspective(0.78f, float(width) / height, 0.01f, 1.0f);
+	transform.screen_project_matrix.set_screen_project(width, height);
 
 	for (auto mesh : g_mesh) {
 		
@@ -71,11 +81,31 @@ void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& ca
 
 		transform.update();
 
-		for (auto idx = 0; idx < mesh->verticesCount; ++idx) {
-			//for (auto idy = idx + 1; idy < mesh->verticesCount; ++idy) {
+		for (uint32 idx = 0; idx < mesh->face_count; ++idx) {
+			auto curr_face = mesh->faces[idx];
+			auto va = mesh->vertices[curr_face.A];
+			auto vb = mesh->vertices[curr_face.B];
+			auto vc = mesh->vertices[curr_face.C];
+
+			auto pixel_a = va * transform.transform_matrix;
+			auto pixel_b = vb * transform.transform_matrix;
+			auto pixel_c = vc * transform.transform_matrix;
+			
+			pixel_a.format();
+			pixel_b.format();
+			pixel_c.format();
+
+			drawLine(pixel_a, pixel_b);
+			drawLine(pixel_b, pixel_c);
+			drawLine(pixel_c, pixel_a);
+		}
+		
+		/*
+		for (uint32 idx = 0; idx < mesh->vt_count; ++idx) {
+			//for (auto idy = idx + 1; idy < mesh->vt_count; ++idy) {
 				//if (idx == idy)	continue;
 				auto pt1 = project(mesh->vertices[idx], transform.transform_matrix);
-				auto pt2 = project(mesh->vertices[(idx+1) % mesh->verticesCount], transform.transform_matrix);
+				auto pt2 = project(mesh->vertices[(idx+1) % mesh->vt_count], transform.transform_matrix);
 
 				//printf("%f %f %f %f\n", mesh->vertices[idx].x, mesh->vertices[idx].y, mesh->vertices[idx].z, mesh->vertices[idx].w);
 				//printf("%f %f %f %f\n", pt.x, pt.y, pt.z, pt.w);
@@ -83,7 +113,7 @@ void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& ca
 				//drawPoint(pt1);
 				drawLine(pt1, pt2);
 			//}
-		}
+		}*/
 	}  
 	glDrawPixels(width, height, GL_RGBA, GL_FLOAT, framebuff);
 }

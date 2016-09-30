@@ -184,6 +184,14 @@ void Mat4::set_rotate(const float& x, const float& y, const float& z, const floa
 
 }
 
+void Mat4::set_screen_project(const float& width, const float& height) {
+	set_identity();
+	m00 = width;
+	m30 = width / 2.0f;
+	m11 = -height;
+	m31 = height / 2.0f;
+}
+
 /**
 *ÉèÖÃÉãÏñ»ú
 *

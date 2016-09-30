@@ -14,8 +14,9 @@ public:
 	Mat4 view_matrix;
 	Mat4 projection_matrix;
 	Mat4 transform_matrix;
+	Mat4 screen_project_matrix;
 	void update(){
-		transform_matrix = world_matrix * view_matrix * projection_matrix;
+		transform_matrix = world_matrix * view_matrix * projection_matrix * screen_project_matrix;
 	}
 };
 
@@ -38,7 +39,8 @@ public:
 	void putPixel(const int& x, const int& y, const Color& clr);
 	void drawPoint(const Point& point);
 	void drawLine(const Point& pt1, const Point& pt2);
+	void drawBLine(const Point& pt0, const Point& pt1);									//drawBresenhamLine
 	void render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera);
-	auto Device::project(const Point& point, const Mat4& transform_matrix) -> decltype(point);
+	auto project(const Point& point, const Mat4& transform_matrix) -> decltype(point);
 };
 

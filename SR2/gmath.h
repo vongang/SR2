@@ -49,7 +49,7 @@ public:
 	};
 public:
 	Vec4() { x = y = z = w = 0; }
-	Vec4(float _x, float _y, float _z, float _w = 0) :x(_x), y(_y), z(_z), w(_w){}
+	Vec4(float _x, float _y, float _z, float _w = 1.0f) :x(_x), y(_y), z(_z), w(_w){}
 	~Vec4() = default;	
 	
 	//vector operate function
@@ -119,7 +119,7 @@ public:
 	void set_translate(const float& x, const float& y, const float& z);						//平移变换
 	void set_scale(const float& x, const float& y, const float& z);							//缩放变换
 	void set_rotate(const float& x, const float& y, const float& z, const float& theta);	//旋转变换
-	
+	void set_screen_project(const float& width, const float& height);						//将CVV投影到屏幕
 
 	/**
 	*设置摄像机

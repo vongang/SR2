@@ -19,16 +19,31 @@ std::vector<std::shared_ptr<Mesh>> g_mesh;
 
 
 void initScene(){
-	auto mesh = std::make_shared<Mesh>("Box", 8);
+	auto mesh = std::make_shared<Mesh>("Box", 8, 12);
 
-	mesh->vertices[0] = Vec4(-1, 1, 1, 1.0f);
-	mesh->vertices[1] = Vec4(1, 1, 1, 1.0f);
-	mesh->vertices[2] = Vec4(-1, -1, 1, 1.0f);
-	mesh->vertices[3] = Vec4(-1, -1, -1, 1.0f);
-	mesh->vertices[4] = Vec4(-1, 1, -1, 1.0f);
-	mesh->vertices[5] = Vec4(1, 1, -1, 1.0f);
-	mesh->vertices[6] = Vec4(1, -1, 1, 1.0f);
-	mesh->vertices[7] = Vec4(1, -1, -1, 1.0f);
+	mesh->vertices[0] = Vec4(-1, 1, 1 );
+	mesh->vertices[1] = Vec4(1, 1, 1 );
+	mesh->vertices[2] = Vec4(-1, -1, 1 );
+	mesh->vertices[3] = Vec4(-1, -1, -1 );
+	mesh->vertices[4] = Vec4(-1, 1, -1 );
+	mesh->vertices[5] = Vec4(1, 1, -1 );
+	mesh->vertices[6] = Vec4(1, -1, 1 );
+	mesh->vertices[7] = Vec4(1, -1, -1 );
+	
+	mesh->faces[0] = Face{ 0, 1, 2 };
+	mesh->faces[1] = Face{ 1, 2, 6 };
+	mesh->faces[2] = Face{ 0, 4, 2 };
+	mesh->faces[3] = Face{ 3, 4, 2 };
+	mesh->faces[4] = Face{ 5, 6, 1 };
+	mesh->faces[5] = Face{ 7, 6, 5 };
+
+	mesh->faces[6] = Face{ 0, 5, 1 };
+	mesh->faces[7] = Face{ 4, 5, 0 };
+	mesh->faces[8] = Face{ 4, 7, 5 };
+	mesh->faces[9] = Face{ 3, 7, 4 };
+	mesh->faces[10] = Face{ 2, 7, 6 };
+	mesh->faces[11] = Face{ 3, 7, 2 };
+
 	//mesh->move(Vec4(1, 1, 1));
 	g_mesh.push_back(mesh);
 
