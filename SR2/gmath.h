@@ -4,6 +4,8 @@
 #include <utility>
 
 
+#define IABS(x)	(x) < 0 ? (-(x)) : (x)
+
 #define CREATE_GET(name)\
 	auto get##name()->decltype(name) { \
 		return name; \
@@ -49,7 +51,7 @@ public:
 	};
 public:
 	Vec4() { x = y = z = w = 0; }
-	Vec4(float _x, float _y, float _z, float _w = 1.0f) :x(_x), y(_y), z(_z), w(_w){}
+	Vec4(float _x, float _y, float _z = 0.0f, float _w = 1.0f) :x(_x), y(_y), z(_z), w(_w){}
 	~Vec4() = default;	
 	
 	//vector operate function

@@ -1,4 +1,4 @@
-#include "Device.h"
+﻿#include "Device.h"
 
 
 Device::Device()
@@ -53,12 +53,25 @@ void Device::drawLine(const Point& pt0, const Point& pt1) {
 }
 
 void Device::drawBLine(const Point& pt0, const Point& pt1) {
-	float delta_x = pt1.x - pt0.x;
-	float delta_y = pt1.y - pt0.y;
-	float error = 0;
-	float delta_err = delta_y / delta_x;
+	int x0 = pt0.x;
+	int y0 = pt0.y;
+	int x1 = pt1.x;
+	int y1 = pt1.y;
+	int dx = IABS(x1 - x0);
+	int dy = IABS(y1 - y0);
+	int sx = (x0 < x1) ? 1 : -1;
+	int sy = (y0 < y1) ? 1 : -1;
+	int err = dx - dy;
 
-	int y = 0;
+	while (true) {
+		drawPoint(Point(x0, y0));
+		//printf("%d %d\n", x0, y0);
+		if ((x0 == x1) && (y0 == y1))	break;
+
+		int e2 = 2 * err;
+		if (e2 > -dy) { err -= dy; x0 += sx; }
+		if (e2 < dx) { err += dx; y0 += sy; }
+	}
 }
 
 auto Device::project(const Point& point, const Mat4& transform_matrix) -> decltype(point) {
@@ -95,9 +108,9 @@ void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& ca
 			pixel_b.format();
 			pixel_c.format();
 
-			drawLine(pixel_a, pixel_b);
-			drawLine(pixel_b, pixel_c);
-			drawLine(pixel_c, pixel_a);
+			drawBLine(pixel_a, pixel_b);
+			drawBLine(pixel_b, pixel_c);
+			drawBLine(pixel_c, pixel_a);
 		}
 		
 		/*
