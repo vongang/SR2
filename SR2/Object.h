@@ -1,4 +1,7 @@
 #pragma once
+#ifndef _OBJECT_H
+#define _OBJECT_H
+
 #include "gmath.h"
 
 class Object
@@ -16,3 +19,4 @@ public:
 	void scale(Vec4& vt);
 	void rotate(Vec4& vt, float& theta);
 };
+#endif

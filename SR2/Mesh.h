@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _MESH_H
+#define _MESH_H
 #include "gmath.h"
 #include <vector>
 #include <string>
@@ -31,3 +33,4 @@ public:
 	~Mesh();
 };
 
+#endif

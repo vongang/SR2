@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef	GMATH_H
 #define GMATH_H
 #include <cmath>

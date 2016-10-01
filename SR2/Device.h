@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _DEVICE_H
+#define _DEVICE_H
 #include <vector>
 #include <memory>
 #include <GL/glew.h>
@@ -44,3 +46,4 @@ public:
 	auto project(const Point& point, const Mat4& transform_matrix) -> decltype(point);
 };
 
+#endif
