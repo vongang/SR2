@@ -9,15 +9,17 @@
 #include "Device.h"
 #include "Mesh.h"
 #include "Camera.h"
+#include "Util.h"
 
 unsigned int window_width = 800, window_height = 600;
 float rotate_theta = 0.0f;
 
+Util util;
 Camera camera;
 std::shared_ptr<Device> g_device(new Device(window_width, window_height));
 std::vector<std::shared_ptr<Mesh>> g_mesh;
 
-
+/*
 void initScene(){
 	auto mesh = std::make_shared<Mesh>("Box", 8, 12);
 
@@ -46,9 +48,32 @@ void initScene(){
 
 	//mesh->move(Vec4(1, 1, 1));
 	g_mesh.push_back(mesh);
+	Vec4 eye(0.0f, 0.0f, 1.0f);
+	Vec4 at(0.0f, 0.0f, 0.0f);
+	camera = Camera(eye, at);
+}
+*/
 
-
-	Vec4 eye(0.0f, 0.0f, 10.0f);
+void initScene(){
+	auto mesh = std::make_shared<Mesh>();
+	if (!util.LoadOBJ("dog.obj", mesh.get())){
+		_asm{
+			int 3;
+		}
+	}
+	mesh->move(Vec4(-0.2f, 0.0f, 0.0f));
+	g_mesh.push_back(mesh);
+	/*
+	for (auto mesh : g_mesh) {
+		for (int i = 0; i < mesh->vt_count; ++i) {
+			printf("%f %f %f\n", mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z);
+		}
+		for (int i = 0; i < mesh->face_count; ++i) {
+			printf("%d %d %d\n", mesh->faces[i].A, mesh->faces[i].B, mesh->faces[i].C);
+		}
+	}
+	*/
+	Vec4 eye(0.0f, 0.0f, 400.0f);
 	Vec4 at(0.0f, 0.0f, 0.0f);
 	camera = Camera(eye, at);
 }
@@ -56,7 +81,7 @@ void initScene(){
 void display(){
 	
 	for (auto mesh : g_mesh){
-		mesh->rotation_matrix.set_rotate(1.0f, 1.0f, 0.5f, rotate_theta);
+		mesh->rotation_matrix.set_rotate(0.0f, 1.0f, 0.0f, rotate_theta);
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -76,7 +101,7 @@ int main(int argc, char* argv[]){
 
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(window_width, window_height);
-	glutCreateWindow("SR1");
+	glutCreateWindow("SR2");
 
 	glutDisplayFunc(display);
 	//glutReshapeFunc(reshape);

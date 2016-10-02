@@ -52,7 +52,7 @@ public:
 		struct { float Red, Green, Blue, Alpha; };
 	};
 public:
-	Vec4() { x = y = z = w = 0; }
+	Vec4() { x = y = z = 0.0f; w = 1.0f; }
 	Vec4(float _x, float _y, float _z = 0.0f, float _w = 1.0f) :x(_x), y(_y), z(_z), w(_w){}
 	~Vec4() = default;	
 	

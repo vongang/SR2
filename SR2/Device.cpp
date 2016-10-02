@@ -57,6 +57,7 @@ void Device::drawBLine(const Point& pt0, const Point& pt1) {
 	int y0 = pt0.y;
 	int x1 = pt1.x;
 	int y1 = pt1.y;
+	//printf("(%d, %d), (%d, %d)\n", x0, y0, x1, y1);
 	int dx = IABS(x1 - x0);
 	int dy = IABS(y1 - y0);
 	int sx = (x0 < x1) ? 1 : -1;
