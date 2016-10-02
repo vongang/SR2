@@ -19,50 +19,16 @@ Camera camera;
 std::shared_ptr<Device> g_device(new Device(window_width, window_height));
 std::vector<std::shared_ptr<Mesh>> g_mesh;
 
-/*
-void initScene(){
-	auto mesh = std::make_shared<Mesh>("Box", 8, 12);
-
-	mesh->vertices[0] = Vec4(-1, 1, 1 );
-	mesh->vertices[1] = Vec4(1, 1, 1 );
-	mesh->vertices[2] = Vec4(-1, -1, 1 );
-	mesh->vertices[3] = Vec4(-1, -1, -1 );
-	mesh->vertices[4] = Vec4(-1, 1, -1 );
-	mesh->vertices[5] = Vec4(1, 1, -1 );
-	mesh->vertices[6] = Vec4(1, -1, 1 );
-	mesh->vertices[7] = Vec4(1, -1, -1 );
-	
-	mesh->faces[0] = Face{ 0, 1, 2 };
-	mesh->faces[1] = Face{ 1, 2, 6 };
-	mesh->faces[2] = Face{ 0, 4, 2 };
-	mesh->faces[3] = Face{ 3, 4, 2 };
-	mesh->faces[4] = Face{ 5, 6, 1 };
-	mesh->faces[5] = Face{ 7, 6, 5 };
-
-	mesh->faces[6] = Face{ 0, 5, 1 };
-	mesh->faces[7] = Face{ 4, 5, 0 };
-	mesh->faces[8] = Face{ 4, 7, 5 };
-	mesh->faces[9] = Face{ 3, 7, 4 };
-	mesh->faces[10] = Face{ 2, 7, 6 };
-	mesh->faces[11] = Face{ 3, 7, 2 };
-
-	//mesh->move(Vec4(1, 1, 1));
-	g_mesh.push_back(mesh);
-	Vec4 eye(0.0f, 0.0f, 1.0f);
-	Vec4 at(0.0f, 0.0f, 0.0f);
-	camera = Camera(eye, at);
-}
-*/
-
 void initScene(){
 	auto mesh = std::make_shared<Mesh>();
-	if (!util.LoadOBJ("dog.obj", mesh.get())){
+	if (!util.LoadOBJ("monkey2.obj", mesh.get())){
 		_asm{
 			int 3;
 		}
 	}
-	mesh->move(Vec4(-0.2f, 0.0f, 0.0f));
+	mesh->move(Vec4(0.0f, 0.0f, 0.0f));
 	g_mesh.push_back(mesh);
+
 	/*
 	for (auto mesh : g_mesh) {
 		for (int i = 0; i < mesh->vt_count; ++i) {
@@ -73,7 +39,7 @@ void initScene(){
 		}
 	}
 	*/
-	Vec4 eye(0.0f, 0.0f, 400.0f);
+	Vec4 eye(0.0f, 0.0f, 10.0f);
 	Vec4 at(0.0f, 0.0f, 0.0f);
 	camera = Camera(eye, at);
 }
@@ -81,7 +47,7 @@ void initScene(){
 void display(){
 	
 	for (auto mesh : g_mesh){
-		mesh->rotation_matrix.set_rotate(0.0f, 1.0f, 0.0f, rotate_theta);
+		mesh->rotation_matrix.set_rotate(1.0f, 1.0f, 1.0f, rotate_theta);
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -89,7 +55,7 @@ void display(){
 
 	g_device->render(g_mesh, camera);
 
-	rotate_theta += 0.01;
+	rotate_theta += 0.02;
 
 	glutSwapBuffers();
 }

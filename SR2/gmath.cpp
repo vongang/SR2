@@ -1,10 +1,21 @@
 #include "gmath.h"
 
+
+const double Math::EPS = 1e-5;
+
+float Math::CMID(float x, float _min, float _max)  { return (x < _min) ? _min : ((x > _max) ? _max : x); }
+float Math::interp(float left, float right, float t) { return left + (right - left) * CMID(t); }
+int Math::dbcmp(float x) {
+	if (x > EPS)	return 1;
+	else if (x < -EPS)	return -1;
+	return 0;
+}
+
 Vec4 Vec4::interp(const Vec4& rhs, const float& t) const {
 	Vec4 temp;
-	temp.x = BaseMathTools::interp(x, rhs.x, t);
-	temp.y = BaseMathTools::interp(y, rhs.y, t);
-	temp.z = BaseMathTools::interp(z, rhs.z, t);
+	temp.x = Math::interp(x, rhs.x, t);
+	temp.y = Math::interp(y, rhs.y, t);
+	temp.z = Math::interp(z, rhs.z, t);
 	temp.w = 1.0f;
 	return std::move(temp);
 }
@@ -43,7 +54,7 @@ Vec4 Vec4::cross(const Vec4& rhs) const {
 
 void Vec4::normalize() {
 	float v_len = length();
-	if (BaseMathTools::dbcmp(v_len) == 0)	return;
+	if (Math::dbcmp(v_len) == 0)	return;
 	x /= v_len;
 	y /= v_len;
 	z /= v_len;
@@ -60,11 +71,12 @@ Vec4 Vec4::operator*(const Mat4& rhs) const {
 	return std::move(tmp);
 }
 
-void Vec4::format() {
+Vec4& Vec4::format() {
 	x /= w;
 	y /= w;
 	z /= w;
 	w = 1.0;
+	return *this;
 }
 
 /*******************************************************/
@@ -186,9 +198,9 @@ void Mat4::set_rotate(const float& x, const float& y, const float& z, const floa
 
 void Mat4::set_screen_project(const float& width, const float& height) {
 	set_identity();
-	m00 = width;
+	m00 = -width;
 	m30 = width / 2.0f;
-	m11 = -height;
+	m11 = height;
 	m31 = height / 2.0f;
 }
 

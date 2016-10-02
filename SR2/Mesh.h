@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _MESH_H
 #define _MESH_H
-#include "gmath.h"
+#include "Gmath.h"
 #include <vector>
 #include <string>
 #include "Object.h"

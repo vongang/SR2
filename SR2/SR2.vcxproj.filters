@@ -21,9 +21,6 @@
     <ClInclude Include="Device.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="gmath.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -33,15 +30,15 @@
     <ClInclude Include="Util.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Gmath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Device.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="gmath.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -54,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Util.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Gmath.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

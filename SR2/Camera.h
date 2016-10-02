@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _CAMERA_H
 #define _CAMERA_H
-#include "gmath.h"
+#include "Gmath.h"
 #include "Object.h"
 
 class Camera : public Object

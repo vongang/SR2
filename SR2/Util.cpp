@@ -19,7 +19,6 @@ bool Util::LoadOBJ(const char* path, Mesh* mesh) {
 			Vec4 vertex;
 			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
 			//printf("%f %f %f %f\n", vertex.x, vertex.y, vertex.z, vertex.w);
-			vertex.y *= -1;
 			temp_vertices.push_back(vertex);
 		}
 		else if (strcmp(line_header, "vn") == 0){

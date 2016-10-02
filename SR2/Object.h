@@ -2,7 +2,7 @@
 #ifndef _OBJECT_H
 #define _OBJECT_H
 
-#include "gmath.h"
+#include "Gmath.h"
 
 class Object
 {

@@ -6,7 +6,7 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 
-#include "gmath.h"
+#include "Gmath.h"
 #include "Mesh.h"
 #include "Camera.h"
 
@@ -31,6 +31,7 @@ class Device
 	Transform transform;
 
 	float* framebuff;
+	float* depthbuff;
 
 public:
 	Device();
@@ -38,12 +39,18 @@ public:
 	Device(uint32& _w, uint32& _h);
 
 	void clear(float r, float g, float b, float a);
-	void putPixel(const int& x, const int& y, const Color& clr);
-	void drawPoint(const Point& point);
+	void putPixel(const int& x, const int& y, const float& zdepth, const Color& clr);
+	void drawPoint(const Point& point, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
 	void drawLine(const Point& pt1, const Point& pt2);
-	void drawBLine(const Point& pt0, const Point& pt1);									//drawBresenhamLine
-	void render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera);
+	void drawBLine(const Point& pt0, const Point& pt1, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));									//drawBresenhamLine
+	void drawTriangle(Point& pt0, Point& pt1, Point& pt2, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));				//»­Èý½ÇÐÎ
+	void processScanLine(const int& y, const Point& pa, const Point& pb, const Point& pc, const Point& pd, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
 	auto project(const Point& point, const Mat4& transform_matrix) -> decltype(point);
+
+	void drawCoordinate();
+
+	void render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera);
+
 };
 
 #endif

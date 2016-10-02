@@ -5,7 +5,6 @@
 #include <cmath>
 #include <utility>
 
-
 #define IABS(x)	(x) < 0 ? (-(x)) : (x)
 
 #define CREATE_GET(name)\
@@ -21,30 +20,25 @@
 typedef unsigned int uint32;
 typedef unsigned char uint8;
 
-
-class BaseMathTools;
 class Vec4;
 class Mat4;
 
 typedef Vec4 Color;
 typedef Vec4 Point;
 
-class BaseMathTools{
-	const double EPS = 1e-5;
+
+class Math {
+private:
+	static const double EPS;// = 1e-5;
 public:
-	BaseMathTools() = default;
-	~BaseMathTools() = default;
-	inline float CMID(float x, float _min, float _max) const { return (x < _min) ? _min : ((x > _max) ? _max : x); }
+	static float CMID(float x, float _min = 0.0f, float _max = 1.0f);// { return (x < _min) ? _min : ((x > _max) ? _max : x); }
 	// 计算插值：t为[0,1]之间的数值
-	inline float interp(float left, float right, float t) const { return left + (right - left) * t; }
-	inline int dbcmp(float x) const {
-		if (x > EPS)	return 1;
-		else if (x < -EPS)	return -1;
-		return 0;
-	}
+	static float interp(float left, float right, float t);// { return left + (right - left) * CMID(t); }
+	static int dbcmp(float x);
 };
 
-class Vec4: public BaseMathTools {
+
+class Vec4 {
 public:
 	union {
 		float v[4];
@@ -80,14 +74,14 @@ public:
 
 	void normalize();					//normalize
 
-	void format();					//x/w, y/w, z/w, 将w调整为1
+	Vec4& format();					//x/w, y/w, z/w, 将w调整为1
 
 };
 
 
-class Mat4 : public BaseMathTools {
+class Mat4 {
 private:
-	union{
+	union {
 		float m[4][4];
 		struct {
 			float m00, m01, m02, m03;
@@ -145,4 +139,5 @@ public:
 	void set_perspective(const float& fovy, const float& aspect, const float& zn, const float& zf);
 
 };
+
 #endif
