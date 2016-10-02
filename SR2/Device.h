@@ -3,12 +3,17 @@
 #define _DEVICE_H
 #include <vector>
 #include <memory>
+#include <thread>
+#include <algorithm>
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 
 #include "Gmath.h"
 #include "Mesh.h"
 #include "Camera.h"
+
+#define THREAD_COUNT 16
 
 class Transform{
 public:
@@ -32,6 +37,7 @@ class Device
 
 	float* framebuff;
 	float* depthbuff;
+	std::vector<std::thread> threads;
 
 public:
 	Device();
@@ -44,6 +50,8 @@ public:
 	void drawLine(const Point& pt1, const Point& pt2);
 	void drawBLine(const Point& pt0, const Point& pt1, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));									//drawBresenhamLine
 	void drawTriangle(Point& pt0, Point& pt1, Point& pt2, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));				//»­Èý½ÇÐÎ
+	void drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, const uint32& end_index);
+	
 	void processScanLine(const int& y, const Point& pa, const Point& pb, const Point& pc, const Point& pd, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
 	auto project(const Point& point, const Mat4& transform_matrix) -> decltype(point);
 

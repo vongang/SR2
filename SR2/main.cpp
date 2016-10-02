@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstring>
 #include <memory>
+#include<chrono>
 
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -18,6 +19,7 @@ Util util;
 Camera camera;
 std::shared_ptr<Device> g_device(new Device(window_width, window_height));
 std::vector<std::shared_ptr<Mesh>> g_mesh;
+std::chrono::time_point<std::chrono::high_resolution_clock> m_time_begin;
 
 void initScene(){
 	auto mesh = std::make_shared<Mesh>();
@@ -29,25 +31,17 @@ void initScene(){
 	mesh->move(Vec4(0.0f, 0.0f, 0.0f));
 	g_mesh.push_back(mesh);
 
-	/*
-	for (auto mesh : g_mesh) {
-		for (int i = 0; i < mesh->vt_count; ++i) {
-			printf("%f %f %f\n", mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z);
-		}
-		for (int i = 0; i < mesh->face_count; ++i) {
-			printf("%d %d %d\n", mesh->faces[i].A, mesh->faces[i].B, mesh->faces[i].C);
-		}
-	}
-	*/
-	Vec4 eye(0.0f, 0.0f, 10.0f);
+	Vec4 eye(0.0f, 0.0f, 12.0f);
 	Vec4 at(0.0f, 0.0f, 0.0f);
 	camera = Camera(eye, at);
 }
 
 void display(){
 	
+	m_time_begin = std::chrono::high_resolution_clock::now();
+
 	for (auto mesh : g_mesh){
-		mesh->rotation_matrix.set_rotate(1.0f, 1.0f, 1.0f, rotate_theta);
+		mesh->rotation_matrix.set_rotate(0.0f, 1.0f, 0.0f, rotate_theta);
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -56,6 +50,10 @@ void display(){
 	g_device->render(g_mesh, camera);
 
 	rotate_theta += 0.02;
+
+	double time_count = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - m_time_begin).count();
+	time_count = 1.0 / time_count * 1000000.0;
+	//printf("FPS %.2f\n", time_count);
 
 	glutSwapBuffers();
 }

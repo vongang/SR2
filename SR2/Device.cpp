@@ -29,15 +29,15 @@ void Device::clear(float r, float g, float b, float a){
 		framebuff[indx + 1] = g;
 		framebuff[indx + 2] = b;
 		framebuff[indx + 3] = a;
-		depthbuff[indx / 4] = 1.0;
+		depthbuff[indx / 4] = 10.0;
 	}
 }
 
 void Device::putPixel(const int& x, const int& y, const float& zdepth, const Color& clr) {
 	auto indx = (x + y * this->width) * 4;
 	auto indx_depth = (x + y * this->width);
-	
-	if (Math::dbcmp(depthbuff[indx_depth] - zdepth) <= 0) return;
+
+	if (Math::dbcmp(depthbuff[indx_depth] - zdepth) <= 0) return;		//深度测试
 	depthbuff[indx_depth] = zdepth;
 
 	framebuff[indx] = clr.Red;
@@ -99,14 +99,24 @@ void Device::drawBLine(const Point& pt0, const Point& pt1, const Color& clr) {
 // p0
 
 void Device::processScanLine(const int& y, const Point& pa, const Point& pb, const Point& pc, const Point& pd, const Color& clr) {
-	auto coefficient1 = (pa.y != pb.y) ? ((y - pa.y) / (pb.y - pa.y)) : 1;
-	auto coefficient2 = (pc.y != pd.y) ? ((y - pc.y) / (pd.y - pc.y)) : 1;
+	auto coefficient1 = (pa.y != pb.y) ? (y - pa.y) / (pb.y - pa.y) : 1;
+	auto coefficient2 = (pc.y != pd.y) ? (y - pc.y) / (pd.y - pc.y) : 1;
 
-	auto sx = static_cast<int>(Math::interp(pa.x, pb.x, coefficient1));
-	auto ex = static_cast<int>(Math::interp(pc.x, pd.x, coefficient2));
-	auto delta_x = sx < ex ? 1 : -1;
-	for (auto x = sx; x != ex; x += delta_x) {
-		drawPoint(Vec4(x, y), clr);
+	auto sx = Math::interp(pa.x, pb.x, coefficient1);
+	auto ex = Math::interp(pc.x, pd.x, coefficient2);
+	
+	if (sx > ex) std::swap(sx, ex);
+
+	//开始的z值与结束的z值
+	auto sz = Math::interp(pa.z, pb.z, coefficient1);
+	auto ez = Math::interp(pc.z, pd.z, coefficient2);
+
+	float t, z;
+
+	for (int x = int(sx); x <= int(ex); x++) {
+		t = float(x - sx) / (ex - sx);
+		z = Math::interp(sz, ez, t);
+		drawPoint(Vec4(x, y, z), clr);
 	}
 }
 
@@ -114,26 +124,14 @@ void Device::drawTriangle(Point& pt0, Point& pt1, Point& pt2, const Color& clr) 
 	if (pt0.y > pt1.y)	std::swap(pt0, pt1);
 	if (pt1.y > pt2.y)	std::swap(pt1, pt2);
 	if (pt0.y > pt1.y) 	std::swap(pt0, pt1);
-
 	
-	float invslope01, invslope02;
-
-	if (Math::dbcmp(pt1.y - pt0.y) > 0) 
-		invslope01 = (pt1.x - pt0.x) / (pt1.y - pt0.y);
-	else 
-		invslope01 = 0;
-
-	if (Math::dbcmp(pt2.y - pt0.y) > 0) 
-		invslope02 = (pt2.x - pt0.x) / (pt2.y - pt0.y);
-	else 
-		invslope02 = 0;
-
-	for (int y = static_cast<int>(pt0.y); y <= static_cast<int>(pt2.y); ++y) {
-		if (y <= static_cast<int>(pt1.y)) {
-			processScanLine(y, pt0, pt1, pt0, pt2, clr);
+		
+	for (int y = int(pt0.y); y <= int(pt2.y); ++y) {
+		if (y <= int(pt1.y)) {
+			processScanLine(y, pt0, pt2, pt0, pt1, clr);
 		}
 		else {
-			processScanLine(y, pt1, pt2, pt0, pt2, clr);
+			processScanLine(y, pt0, pt2, pt1, pt2, clr);
 		}
 	}
 }
@@ -145,32 +143,61 @@ auto Device::project(const Point& point, const Mat4& transform_matrix) -> declty
 
 void Device::drawCoordinate() {
 	Vec4 p0(0.0f, 0.0f, 0.0f);
-	Vec4 p1(1.0f, 0.0f, 0.0f);
-	Vec4 p2(0.0f, 1.0f, 0.0f);
-	Vec4 p3(0.0f, 0.0f, 1.0f);
+	Vec4 p1(3.0f, 0.0f, 0.0f);
+	Vec4 p2(0.0f, 3.0f, 0.0f);
+	Vec4 p3(0.0f, 0.0f, 3.0f);
 
-	auto px0 = (p0 * transform.transform_matrix).format();
-	auto px1 = (p1 * transform.transform_matrix).format();
-	auto px2 = (p2 * transform.transform_matrix).format();
-	auto px3 = (p3 * transform.transform_matrix).format();
+	auto px0 = project(p0, transform.transform_matrix);
+	auto px1 = project(p1, transform.transform_matrix);
+	auto px2 = project(p2, transform.transform_matrix);
+	auto px3 = project(p3, transform.transform_matrix);
 
-	drawBLine(px0, px1, Color(1.0f, 0.0f, 0.0f));
+	drawTriangle(px0, px0, px1, Color(1.0f, 0.0f, 0.0f));
+	drawTriangle(px0, px0, px2, Color(.0f, 1.0f, 0.0f));
+	drawTriangle(px0, px0, px3, Color(.0f, 0.0f, 1.0f));
+
+
+	/*drawBLine(px0, px1, Color(1.0f, 0.0f, 0.0f));
 	drawBLine(px0, px2, Color(0.0f, 1.0f, 0.0f));
-	drawBLine(px0, px3, Color(0.0f, 0.0f, 1.0f));
+	drawBLine(px0, px3, Color(0.0f, 0.0f, 1.0f));*/
 }
 
-void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera) {
-	
+void Device::drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, const uint32& end_index){
+	if (start_index >= mesh->face_count)	return;
 
+	Color clr1(1.0f, 1.0f, 1.0f, 1.0f);
+	Color clr2(128.0 / 255, 128.0 / 255, 128.0 / 255, 1.0f);
+	bool color_flag = false;
+	
+	for (uint32 idx = start_index; idx < std::min(end_index, mesh->face_count); ++idx) {
+		auto curr_face = mesh->faces[idx];
+		auto va = mesh->vertices[curr_face.A];
+		auto vb = mesh->vertices[curr_face.B];
+		auto vc = mesh->vertices[curr_face.C];
+
+		auto pixel_a = project(va, transform.transform_matrix);
+		auto pixel_b = project(vb, transform.transform_matrix);
+		auto pixel_c = project(vc, transform.transform_matrix);
+
+		/*drawBLine(pixel_a, pixel_b);
+		drawBLine(pixel_b, pixel_c);
+		drawBLine(pixel_c, pixel_a);*/
+		drawTriangle(pixel_a, pixel_b, pixel_c, color_flag ? clr1 : clr2);
+		color_flag = !color_flag;
+	}
+}
+	
+void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera) {
 	transform.view_matrix.set_lookat(camera.position, camera.at, camera.up);
 	transform.projection_matrix.set_perspective(0.78f, float(width) / height, 0.01f, 1.0f);
 	transform.screen_project_matrix.set_screen_project(width, height);
 	transform.world_matrix.set_identity();
+	
 	transform.update();
 
 	drawCoordinate();
 
-	Color clr1(1.0f, 1.0f, 1.0f, 0.0f), clr2(128.0 / 255, 128.0 / 255, 128.0 / 255, 0.0f);
+	
 	bool flag = true;
 	for (auto mesh : g_mesh) {
 		
@@ -178,22 +205,12 @@ void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& ca
 
 		transform.update();
 
-		for (uint32 idx = 0; idx < mesh->face_count; ++idx) {
-			auto curr_face = mesh->faces[idx];
-			auto va = mesh->vertices[curr_face.A];
-			auto vb = mesh->vertices[curr_face.B];
-			auto vc = mesh->vertices[curr_face.C];
-
-			auto pixel_a = project(va, transform.transform_matrix);
-			auto pixel_b = project(vb, transform.transform_matrix);
-			auto pixel_c = project(vc, transform.transform_matrix);
-
-			/*drawBLine(pixel_a, pixel_b);
-			drawBLine(pixel_b, pixel_c);
-			drawBLine(pixel_c, pixel_a);*/
-			drawTriangle(pixel_a, pixel_b, pixel_c, flag ? clr1 : clr2);
-			flag = !flag;
+		threads.clear();
+		int seg = (mesh->face_count + THREAD_COUNT) / THREAD_COUNT;
+		for (int i = 0; i < THREAD_COUNT; ++i) {
+			threads.push_back(std::thread(std::bind(&Device::drawFace, this, mesh, i*seg, (i + 1)*seg)));	//********类的成员函数传入std::thread要用std::bind********
 		}
+		std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));		
 	}  
 	glDrawPixels(width, height, GL_RGBA, GL_FLOAT, framebuff);
 }
