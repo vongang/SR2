@@ -69,6 +69,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CONFIG.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Gmath.h" />
     <ClInclude Include="Mesh.h" />

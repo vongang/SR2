@@ -4,16 +4,18 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <mutex>
 #include <algorithm>
 
 #include <GL/glew.h>
 #include <GL/glut.h>
 
+#include "CONFIG.h"
 #include "Gmath.h"
 #include "Mesh.h"
 #include "Camera.h"
 
-#define THREAD_COUNT 16
+#define THREAD_COUNT 8
 
 class Transform{
 public:
@@ -31,13 +33,15 @@ class Device
 {
 	uint32 width;
 	uint32 height;
-	uint32 buffsize;
+	uint32 fbuffsize;
 
 	Transform transform;
 
-	float* framebuff;
-	float* depthbuff;
-	std::vector<std::thread> threads;
+	float* framebuff;					//每个像素的rgba
+	float* depthbuff;					//每个像素的深度缓存
+	std::mutex* lockbuff;				//针对每个像素的锁
+
+	std::vector<std::thread> threads;	//多线程维护队列
 
 public:
 	Device();
@@ -45,6 +49,8 @@ public:
 	Device(uint32& _w, uint32& _h);
 
 	void clear(float r, float g, float b, float a);
+
+
 	void putPixel(const int& x, const int& y, const float& zdepth, const Color& clr);
 	void drawPoint(const Point& point, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
 	void drawLine(const Point& pt1, const Point& pt2);

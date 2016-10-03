@@ -5,45 +5,59 @@ Device::Device()
 {
 	framebuff = nullptr;
 	depthbuff = nullptr;
+	lockbuff = nullptr;
 }
 
 Device::~Device()
 {
 	delete[] framebuff;
 	delete[] depthbuff;
+	delete[] lockbuff;
 	depthbuff = nullptr;
 	framebuff = nullptr;
+	lockbuff = nullptr;
 }
 
 Device::Device(uint32& _w, uint32& _h){
 	width = _w;
 	height = _h;
-	buffsize = _w *_h * 4;
-	framebuff = new float[buffsize];
+	fbuffsize = _w *_h * 4;
+	framebuff = new float[fbuffsize];
 	depthbuff = new float[_w * _h];
+	lockbuff = new std::mutex[_w * _h];
 }
 
 void Device::clear(float r, float g, float b, float a){
-	for (uint32 indx = 0; indx < buffsize; indx += 4) {
+	for (uint32 indx = 0; indx < fbuffsize; indx += 4) {
 		framebuff[indx] = r;
 		framebuff[indx + 1] = g;
 		framebuff[indx + 2] = b;
 		framebuff[indx + 3] = a;
-		depthbuff[indx / 4] = 10.0;
+		depthbuff[indx / 4] = 1e9;
 	}
 }
 
 void Device::putPixel(const int& x, const int& y, const float& zdepth, const Color& clr) {
 	auto indx = (x + y * this->width) * 4;
 	auto indx_depth = (x + y * this->width);
+	{
+#ifdef MULTI_PROCESS
+		std::unique_lock<std::mutex> lg(lockbuff[indx_depth]);				//对当前像素加锁
+#endif
+		//(lockbuff[indx_depth]).lock();
+		//if (Math::dbcmp(depthbuff[indx_depth] - zdepth) <= 0)	return;		//stupid, 自己控制锁还加return，return以后锁根本就没释放
+		if (Math::dbcmp(depthbuff[indx_depth] - zdepth) >= 0) {		//深度测试
+			depthbuff[indx_depth] = zdepth;
 
-	if (Math::dbcmp(depthbuff[indx_depth] - zdepth) <= 0) return;		//深度测试
-	depthbuff[indx_depth] = zdepth;
+			framebuff[indx] = clr.Red;
+			framebuff[indx + 1] = clr.Green;
+			framebuff[indx + 2] = clr.Blue;
+			framebuff[indx + 3] = clr.Alpha;
+		}
+		//(lockbuff[indx_depth]).unlock();
+		//lock_guard在这里被自动释放
+	}
 
-	framebuff[indx] = clr.Red;
-	framebuff[indx + 1] = clr.Green;
-	framebuff[indx + 2] = clr.Blue;
-	framebuff[indx + 3] = clr.Alpha;
 }
 
 
@@ -168,8 +182,9 @@ void Device::drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, co
 	Color clr1(1.0f, 1.0f, 1.0f, 1.0f);
 	Color clr2(128.0 / 255, 128.0 / 255, 128.0 / 255, 1.0f);
 	bool color_flag = false;
-	
-	for (uint32 idx = start_index; idx < std::min(end_index, mesh->face_count); ++idx) {
+	uint32 end = std::min(end_index, mesh->face_count);
+
+	for (uint32 idx = start_index; idx < end; ++idx) {
 		auto curr_face = mesh->faces[idx];
 		auto va = mesh->vertices[curr_face.A];
 		auto vb = mesh->vertices[curr_face.B];
@@ -204,13 +219,19 @@ void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& ca
 		transform.world_matrix = mesh->translate_matrix * mesh->rotation_matrix;
 
 		transform.update();
-
-		threads.clear();
 		int seg = (mesh->face_count + THREAD_COUNT) / THREAD_COUNT;
+#ifdef MULTI_PROCESS
+		threads.clear();
+		
 		for (int i = 0; i < THREAD_COUNT; ++i) {
-			threads.push_back(std::thread(std::bind(&Device::drawFace, this, mesh, i*seg, (i + 1)*seg)));	//********类的成员函数传入std::thread要用std::bind********
+			threads.push_back(std::thread(std::bind(&Device::drawFace, this, mesh, i*seg, (i + 1)*seg))); //********类的成员函数传入std::thread要用std::bind********
 		}
-		std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));		
+		std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+#else
+		for (int i = 0; i < THREAD_COUNT; ++i) {
+			drawFace(mesh, i*seg, (i + 1)*seg);	
+		}
+#endif
 	}  
 	glDrawPixels(width, height, GL_RGBA, GL_FLOAT, framebuff);
 }
