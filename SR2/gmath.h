@@ -64,6 +64,8 @@ public:
 
 	Vec4 operator * (const Mat4& rhs) const;
 
+	Vec4 operator * (const float& f) const;
+
 	Vec4 operator / (const float& f) const;
 
 	float dot(const Vec4& rhs) const;			//dot product
@@ -80,9 +82,10 @@ public:
 
 
 class Mat4 {
-private:
+public:
 	union {
 		float m[4][4];
+		float mm[16];
 		struct {
 			float m00, m01, m02, m03;
 			float m10, m11, m12, m13;
@@ -110,6 +113,8 @@ public:
 	Mat4 operator * (const Mat4& rhs) const;
 
 	Mat4 operator * (const float& f) const;
+
+	bool matrix_inv();
 
 	void set_identity();	//…Ë÷√µ•Œªæÿ’Û
 	void set_zero();		//æÿ’ÛπÈ¡„

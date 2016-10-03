@@ -112,63 +112,99 @@ void Device::drawBLine(const Point& pt0, const Point& pt1, const Color& clr) {
 // -
 // p0
 
-void Device::processScanLine(const int& y, const Point& pa, const Point& pb, const Point& pc, const Point& pd, const Color& clr) {
-	auto coefficient1 = (pa.y != pb.y) ? (y - pa.y) / (pb.y - pa.y) : 1;
-	auto coefficient2 = (pc.y != pd.y) ? (y - pc.y) / (pd.y - pc.y) : 1;
+void Device::processScanLine(const ScanLineData& data, const Vertex& pa, const Vertex& pb, const Vertex& pc, const Vertex& pd, const Color& clr) {
+	auto coefficient1 = (pa.coordinate.y != pb.coordinate.y) ? (data.current_y - pa.coordinate.y) / (pb.coordinate.y - pa.coordinate.y) : 1;
+	auto coefficient2 = (pc.coordinate.y != pd.coordinate.y) ? (data.current_y - pc.coordinate.y) / (pd.coordinate.y - pc.coordinate.y) : 1;
 
-	auto sx = Math::interp(pa.x, pb.x, coefficient1);
-	auto ex = Math::interp(pc.x, pd.x, coefficient2);
+	auto sx = Math::interp(pa.coordinate.x, pb.coordinate.x, coefficient1);
+	auto ex = Math::interp(pc.coordinate.x, pd.coordinate.x, coefficient2);
 	
-	if (sx > ex) std::swap(sx, ex);
+
 
 	//开始的z值与结束的z值
-	auto sz = Math::interp(pa.z, pb.z, coefficient1);
-	auto ez = Math::interp(pc.z, pd.z, coefficient2);
+	auto sz = Math::interp(pa.coordinate.z, pb.coordinate.z, coefficient1);
+	auto ez = Math::interp(pc.coordinate.z, pd.coordinate.z, coefficient2);
 
+	if (sx > ex) {
+		std::swap(sx, ex);
+		//std::swap(sz, ez);
+	}
+	
 	float t, z;
 
 	for (int x = int(sx); x <= int(ex); x++) {
 		t = float(x - sx) / (ex - sx);
 		z = Math::interp(sz, ez, t);
-		drawPoint(Vec4(x, y, z), clr);
+		drawPoint(Vec4(x, data.current_y, z), clr * data.n_dot_l_0);
 	}
 }
 
-void Device::drawTriangle(Point& pt0, Point& pt1, Point& pt2, const Color& clr) {
-	if (pt0.y > pt1.y)	std::swap(pt0, pt1);
-	if (pt1.y > pt2.y)	std::swap(pt1, pt2);
-	if (pt0.y > pt1.y) 	std::swap(pt0, pt1);
+float Device::computeNDotL(const Vec4& center_point, const Vec4& vn_face, const Vec4& light_pos) {
+	Vec4 light_dir = light_pos - center_point;
+	Vec4 normal = vn_face;
+	light_dir.normalize();
+	normal.normalize();
+	float res = normal.dot(light_dir);
+	return (res < 0 ? -res : res);
+}
+
+void Device::drawTriangle(Vertex& v0, Vertex& v1, Vertex& v2, const Color& clr) {
+	if (v0.coordinate.y > v1.coordinate.y)	std::swap(v0, v1);
+	if (v1.coordinate.y > v2.coordinate.y)	std::swap(v1, v2);
+	if (v0.coordinate.y > v1.coordinate.y) 	std::swap(v0, v1);
 	
-		
-	for (int y = int(pt0.y); y <= int(pt2.y); ++y) {
-		if (y <= int(pt1.y)) {
-			processScanLine(y, pt0, pt2, pt0, pt1, clr);
+	Vec4 p0 = v0.coordinate;
+	Vec4 p1 = v1.coordinate;
+	Vec4 p2 = v2.coordinate;
+
+	Vec4 vn_face = (v0.normal + v1.normal + v2.normal) / 3;
+	Vec4 center_point = (v0.world_coordiante + v1.world_coordiante + v2.world_coordiante) / 3;
+
+	Vec4 light_pos(0.0f, 10.0f, 10.0f);
+
+	float n_dot_l = computeNDotL(center_point, vn_face, light_pos);
+
+	ScanLineData sld;
+	sld.n_dot_l_0 = n_dot_l;
+
+	for (int y = int(v0.coordinate.y); y <= int(v2.coordinate.y); ++y) {
+		sld.current_y = y;
+		if (y <= int(v1.coordinate.y)) {
+			processScanLine(sld, v0, v2, v0, v1, clr);
 		}
 		else {
-			processScanLine(y, pt0, pt2, pt1, pt2, clr);
+			processScanLine(sld, v0, v2, v1, v2, clr);
 		}
 	}
 }
 
-auto Device::project(const Point& point, const Mat4& transform_matrix) -> decltype(point) {
-	auto pt = (point * transform_matrix).format();
-	return std::move(pt);
+auto Device::project(const Vertex& point) -> decltype(point) {
+	Vertex res;
+	Mat4 world_trans_matrix = transform.world_matrix;
+
+	res.coordinate = (point.coordinate * transform.transform_matrix).format();
+	res.world_coordiante = (point.coordinate * world_trans_matrix);
+
+	//world_trans_matrix.matrix_inv();
+	res.normal = (point.normal * world_trans_matrix);
+	
+	return std::move(res);
 }
 
 void Device::drawCoordinate() {
-	Vec4 p0(0.0f, 0.0f, 0.0f);
-	Vec4 p1(3.0f, 0.0f, 0.0f);
-	Vec4 p2(0.0f, 3.0f, 0.0f);
-	Vec4 p3(0.0f, 0.0f, 3.0f);
+	//Vec4 p0(0.0f, 0.0f, 0.0f);
+	//Vec4 p1(3.0f, 0.0f, 0.0f);
+	//Vec4 p2(0.0f, 3.0f, 0.0f);
+	//Vec4 p3(0.0f, 0.0f, 3.0f);
 
-	auto px0 = project(p0, transform.transform_matrix);
-	auto px1 = project(p1, transform.transform_matrix);
-	auto px2 = project(p2, transform.transform_matrix);
-	auto px3 = project(p3, transform.transform_matrix);
+	//auto px0 = project(p0, transform.transform_matrix);
+	//auto px1 = project(p1, transform.transform_matrix);
+	//auto px2 = project(p2, transform.transform_matrix);
+	//auto px3 = project(p3, transform.transform_matrix);
 
-	drawTriangle(px0, px0, px1, Color(1.0f, 0.0f, 0.0f));
-	drawTriangle(px0, px0, px2, Color(.0f, 1.0f, 0.0f));
-	drawTriangle(px0, px0, px3, Color(.0f, 0.0f, 1.0f));
+	//drawTriangle(px0, px0, px1, Color(1.0f, 0.0f, 0.0f));
+	//drawTriangle(px0, px0, px2, Color(.0f, 1.0f, 0.0f));
+	//drawTriangle(px0, px0, px3, Color(.0f, 0.0f, 1.0f));
 
 
 	/*drawBLine(px0, px1, Color(1.0f, 0.0f, 0.0f));
@@ -180,24 +216,30 @@ void Device::drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, co
 	if (start_index >= mesh->face_count)	return;
 
 	Color clr1(1.0f, 1.0f, 1.0f, 1.0f);
-	Color clr2(128.0 / 255, 128.0 / 255, 128.0 / 255, 1.0f);
+	//Color clr2(128.0 / 255, 128.0 / 255, 128.0 / 255, 1.0f);
 	bool color_flag = false;
 	uint32 end = std::min(end_index, mesh->face_count);
 
 	for (uint32 idx = start_index; idx < end; ++idx) {
-		auto curr_face = mesh->faces[idx];
-		auto va = mesh->vertices[curr_face.A];
-		auto vb = mesh->vertices[curr_face.B];
-		auto vc = mesh->vertices[curr_face.C];
 
-		auto pixel_a = project(va, transform.transform_matrix);
-		auto pixel_b = project(vb, transform.transform_matrix);
-		auto pixel_c = project(vc, transform.transform_matrix);
+		Vertex va; 
+		Vertex vb; 
+		Vertex vc; 
+		
+		va.coordinate = mesh->vertices[mesh->faces[idx].A];
+		vb.coordinate = mesh->vertices[mesh->faces[idx].B];
+		vc.coordinate = mesh->vertices[mesh->faces[idx].C];
 
-		/*drawBLine(pixel_a, pixel_b);
-		drawBLine(pixel_b, pixel_c);
-		drawBLine(pixel_c, pixel_a);*/
-		drawTriangle(pixel_a, pixel_b, pixel_c, color_flag ? clr1 : clr2);
+		va.normal = mesh->normals[mesh->faces[idx].n0];
+		vb.normal = mesh->normals[mesh->faces[idx].n1];
+		vc.normal = mesh->normals[mesh->faces[idx].n2];
+
+		auto pixel_a = project(va);
+		auto pixel_b = project(vb);
+		auto pixel_c = project(vc);
+
+		//drawTriangle(pixel_a, pixel_b, pixel_c, color_flag ? clr1 : clr2);
+		drawTriangle(pixel_a, pixel_b, pixel_c, clr1);
 		color_flag = !color_flag;
 	}
 }
@@ -210,7 +252,7 @@ void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& ca
 	
 	transform.update();
 
-	drawCoordinate();
+	//drawCoordinate();
 
 	
 	bool flag = true;

@@ -53,7 +53,7 @@ void display(){
 
 	double time_count = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - m_time_begin).count();
 	time_count = 1.0 / time_count * 1000000.0;
-	printf("FPS %.2f\n", time_count);
+	//printf("FPS %.2f\n", time_count);
 
 	glutSwapBuffers();
 }

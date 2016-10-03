@@ -15,7 +15,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 
-#define THREAD_COUNT 8
+
 
 class Transform{
 public:
@@ -27,6 +27,14 @@ public:
 	void update(){
 		transform_matrix = world_matrix * view_matrix * projection_matrix * screen_project_matrix;
 	}
+};
+
+struct ScanLineData {		//用来想processScanLine传数据
+	int current_y;
+	float n_dot_l_0;		//n_dot_l -> normal dot light
+	float n_dot_l_1;
+	float n_dot_l_2;
+	float n_dot_l_3;
 };
 
 class Device
@@ -55,11 +63,13 @@ public:
 	void drawPoint(const Point& point, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
 	void drawLine(const Point& pt1, const Point& pt2);
 	void drawBLine(const Point& pt0, const Point& pt1, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));									//drawBresenhamLine
-	void drawTriangle(Point& pt0, Point& pt1, Point& pt2, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));				//画三角形
+	void drawTriangle(Vertex& pt0, Vertex& pt1, Vertex& pt2, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));				//画三角形
 	void drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, const uint32& end_index);
 	
-	void processScanLine(const int& y, const Point& pa, const Point& pb, const Point& pc, const Point& pd, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
-	auto project(const Point& point, const Mat4& transform_matrix) -> decltype(point);
+
+	float computeNDotL(const Vec4& center_point, const Vec4& vn_face, const Vec4& light_pos);
+	void processScanLine(const ScanLineData& y, const Vertex& pa, const Vertex& pb, const Vertex& pc, const Vertex& pd, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
+	auto project(const Vertex& point) -> decltype(point);
 
 	void drawCoordinate();
 
