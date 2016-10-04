@@ -29,12 +29,33 @@ public:
 	}
 };
 
-struct ScanLineData {		//用来想processScanLine传数据
-	int current_y;
+struct ScanLineData {		//用来向processScanLine传数据
+	uint32 current_y;
 	float n_dot_l_0;		//n_dot_l -> normal dot light
 	float n_dot_l_1;
 	float n_dot_l_2;
 	float n_dot_l_3;
+};
+
+class SceneResources {
+public:
+	const Camera* camera;
+	const Light* light;
+	SceneResources() {
+		camera = nullptr;
+		light = nullptr;
+	}
+	~SceneResources() {
+		camera = nullptr;
+		light = nullptr;
+	}
+	SceneResources(const Camera& camera, const Light& light) {
+
+	}
+	void set(const Camera& camera, const Light& light) {
+		this->camera = &camera;
+		this->light = &light;
+	}
 };
 
 class Device
@@ -47,9 +68,11 @@ class Device
 
 	float* framebuff;					//每个像素的rgba
 	float* depthbuff;					//每个像素的深度缓存
-	std::mutex* lockbuff;				//针对每个像素的锁
 
+	std::mutex* lockbuff;				//针对每个像素的mutex
 	std::vector<std::thread> threads;	//多线程维护队列
+
+	SceneResources sr;					//
 
 public:
 	Device();
@@ -58,11 +81,10 @@ public:
 
 	void clear(float r, float g, float b, float a);
 
-
 	void putPixel(const int& x, const int& y, const float& zdepth, const Color& clr);
 	void drawPoint(const Point& point, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
-	void drawLine(const Point& pt1, const Point& pt2);
-	void drawBLine(const Point& pt0, const Point& pt1, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));									//drawBresenhamLine
+	void drawLine(const Point& pt1, const Point& pt2);																		//传统中间点画线方法
+	void drawBLine(const Point& pt0, const Point& pt1, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));					//drawBresenhamLine
 	void drawTriangle(Vertex& pt0, Vertex& pt1, Vertex& pt2, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));				//画三角形
 	void drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, const uint32& end_index);
 	
@@ -73,7 +95,7 @@ public:
 	auto project(const Vertex& point) -> decltype(point);
 
 	void drawCoordinate();
-	void render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera);
+	void render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera, const Light& light);
 
 };
 
