@@ -64,22 +64,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bbox.obj">
+    <None Include="Models\bbox.obj">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="box.obj">
+    <None Include="Models\box.obj">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="bunny.obj">
+    <None Include="Models\bunny.obj">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="dog.obj">
+    <None Include="Models\dog.obj">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="monkey.obj">
+    <None Include="Models\monkey.obj">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="monkey2.obj">
+    <None Include="Models\monkey2.obj">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

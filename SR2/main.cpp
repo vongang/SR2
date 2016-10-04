@@ -24,7 +24,7 @@ std::chrono::time_point<std::chrono::high_resolution_clock> m_time_begin;
 
 void initScene(){
 	auto mesh = std::make_shared<Mesh>();
-	if (!util.LoadOBJ("bunny.obj", mesh.get())){
+	if (!util.LoadOBJ("Models/bunny.obj", mesh.get())){
 		_asm{
 			int 3;
 		}
