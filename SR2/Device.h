@@ -66,13 +66,13 @@ public:
 	void drawTriangle(Vertex& pt0, Vertex& pt1, Vertex& pt2, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));				//»­Èý½ÇÐÎ
 	void drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, const uint32& end_index);
 	
+	bool backCullingCheck(const Vec4& vnormal, const Vec4& vlight);
 
 	float computeNDotL(const Vec4& center_point, const Vec4& vn_face, const Vec4& light_pos);
 	void processScanLine(const ScanLineData& y, const Vertex& pa, const Vertex& pb, const Vertex& pc, const Vertex& pd, const Color& clr = Color(1.0f, 1.0f, 1.0f, 1.0f));
 	auto project(const Vertex& point) -> decltype(point);
 
 	void drawCoordinate();
-
 	void render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera);
 
 };

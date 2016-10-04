@@ -256,7 +256,7 @@ void Mat4::set_lookat(const Vec4& eye, const Vec4& at, const Vec4& up) {
 *zf		Ô¶²Ã¼ôÃæÎ»ÖÃzÖµ
 */
 void Mat4::set_perspective(const float& fovy, const float& aspect, const float& zn, const float& zf){
-	float ct = 1.0f / tan(fovy * 0.5);
+	float ct = 1.0f / tan(fovy * 0.5f);
 	set_zero();
 	m00 = ct / aspect;
 	m11 = ct;
@@ -265,7 +265,23 @@ void Mat4::set_perspective(const float& fovy, const float& aspect, const float& 
 	m23 = 1.0f;
 }
 
-bool Mat4::matrix_inv(){
+void Mat4::matrix_transpose() {	//×ªÖÃ¾ØÕó
+	for (int i = 0; i < 4; ++i) {
+		for (int j = i + 1; j < 4; ++j) {
+			auto tm = m[i][j];
+			m[i][j] = m[j][i];
+			m[j][i] = tm;
+		}
+	}
+}
+
+bool Mat4::matrix_inv_traspose() {		//Äæ×ªÖÃ
+	if (!matrix_inv())	return false;
+	matrix_transpose();
+	return true;
+}
+
+bool Mat4::matrix_inv(){	//Äæ¾ØÕó
 	float inv[16], det;
 	int i;
 	inv[0] = mm[5] * mm[10] * mm[15] -
@@ -382,10 +398,10 @@ bool Mat4::matrix_inv(){
 
 	det = mm[0] * inv[0] + mm[1] * inv[4] + mm[2] * inv[8] + mm[3] * inv[12];
 
-	if (det == 0)
+	if (det == 0.0f)
 		return false;
 
-	det = 1.0 / det;
+	det = 1.0f / det;
 
 	for (i = 0; i < 16; i++)
 		this->mm[i] = inv[i] * det;

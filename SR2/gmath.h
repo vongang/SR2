@@ -114,7 +114,10 @@ public:
 
 	Mat4 operator * (const float& f) const;
 
-	bool matrix_inv();
+	bool matrix_inv();				//Äæ¾ØÕó
+	void matrix_transpose();		//×ªÖÃ¾ØÕó
+	
+	bool matrix_inv_traspose();		//Äæ×ªÖÃ
 
 	void set_identity();	//ÉèÖÃµ¥Î»¾ØÕó
 	void set_zero();		//¾ØÕó¹éÁã

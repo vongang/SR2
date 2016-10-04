@@ -124,18 +124,26 @@ void Device::processScanLine(const ScanLineData& data, const Vertex& pa, const V
 	//开始的z值与结束的z值
 	auto sz = Math::interp(pa.coordinate.z, pb.coordinate.z, coefficient1);
 	auto ez = Math::interp(pc.coordinate.z, pd.coordinate.z, coefficient2);
+	
+	//高氏着色 插值
+
+	auto snl = Math::interp(data.n_dot_l_0, data.n_dot_l_1, coefficient1);
+	auto enl = Math::interp(data.n_dot_l_2, data.n_dot_l_3, coefficient2);
+		
 
 	if (sx > ex) {
 		std::swap(sx, ex);
-		//std::swap(sz, ez);
+		std::swap(sz, ez);
+		std::swap(snl, enl);
 	}
 	
-	float t, z;
+	float t, z, n_dot_l;
 
 	for (int x = int(sx); x <= int(ex); x++) {
 		t = float(x - sx) / (ex - sx);
 		z = Math::interp(sz, ez, t);
-		drawPoint(Vec4(x, data.current_y, z), clr * data.n_dot_l_0);
+		n_dot_l = Math::interp(snl, enl, t);
+		drawPoint(Vec4(x, data.current_y, z), clr * n_dot_l);
 	}
 }
 
@@ -146,6 +154,14 @@ float Device::computeNDotL(const Vec4& center_point, const Vec4& vn_face, const 
 	normal.normalize();
 	float res = normal.dot(light_dir);
 	return (res < 0 ? -res : res);
+}
+
+bool Device::backCullingCheck(const Vec4& vnormal, const Vec4& vlight) {
+	Vec4 vn_face = vnormal;
+	Vec4 vn_light = vlight;
+	vn_face.normalize();
+	vn_light.normalize();
+	return Math::dbcmp(vn_face.dot(vn_light)) >= 0;
 }
 
 void Device::drawTriangle(Vertex& v0, Vertex& v1, Vertex& v2, const Color& clr) {
@@ -162,17 +178,29 @@ void Device::drawTriangle(Vertex& v0, Vertex& v1, Vertex& v2, const Color& clr) 
 
 	Vec4 light_pos(0.0f, 10.0f, 10.0f);
 
-	float n_dot_l = computeNDotL(center_point, vn_face, light_pos);
+	if (!backCullingCheck(vn_face, Vec4(0.0f, 0.0f, 10.0f) - center_point))	return;
+
+	float n_dot_l_0 = computeNDotL(v0.world_coordiante, v0.normal, light_pos);
+	float n_dot_l_1 = computeNDotL(v1.world_coordiante, v1.normal, light_pos);
+	float n_dot_l_2 = computeNDotL(v2.world_coordiante, v2.normal, light_pos);
+
 
 	ScanLineData sld;
-	sld.n_dot_l_0 = n_dot_l;
 
 	for (int y = int(v0.coordinate.y); y <= int(v2.coordinate.y); ++y) {
 		sld.current_y = y;
 		if (y <= int(v1.coordinate.y)) {
+			sld.n_dot_l_0 = n_dot_l_0;
+			sld.n_dot_l_1 = n_dot_l_2;
+			sld.n_dot_l_2 = n_dot_l_0;
+			sld.n_dot_l_3 = n_dot_l_1;
 			processScanLine(sld, v0, v2, v0, v1, clr);
 		}
 		else {
+			sld.n_dot_l_0 = n_dot_l_0;
+			sld.n_dot_l_1 = n_dot_l_2;
+			sld.n_dot_l_2 = n_dot_l_1;
+			sld.n_dot_l_3 = n_dot_l_2;
 			processScanLine(sld, v0, v2, v1, v2, clr);
 		}
 	}
@@ -185,7 +213,7 @@ auto Device::project(const Vertex& point) -> decltype(point) {
 	res.coordinate = (point.coordinate * transform.transform_matrix).format();
 	res.world_coordiante = (point.coordinate * world_trans_matrix);
 
-	//world_trans_matrix.matrix_inv();
+	world_trans_matrix.matrix_inv_traspose();
 	res.normal = (point.normal * world_trans_matrix);
 	
 	return std::move(res);
