@@ -1,8 +1,11 @@
+#pragma once
+
 #ifndef	GMATH_H
 #define GMATH_H
 #include <cmath>
 #include <utility>
 
+#define IABS(x)	(x) < 0 ? (-(x)) : (x)
 
 #define CREATE_GET(name)\
 	auto get##name()->decltype(name) { \
@@ -17,30 +20,25 @@
 typedef unsigned int uint32;
 typedef unsigned char uint8;
 
-
-class BaseMathTools;
 class Vec4;
 class Mat4;
 
 typedef Vec4 Color;
 typedef Vec4 Point;
 
-class BaseMathTools{
-	const double EPS = 1e-5;
+
+class Math {
+private:
+	static const double EPS;// = 1e-5;
 public:
-	BaseMathTools() = default;
-	~BaseMathTools() = default;
-	inline float CMID(float x, float _min, float _max) const { return (x < _min) ? _min : ((x > _max) ? _max : x); }
+	static float CMID(float x, float _min = 0.0f, float _max = 1.0f);// { return (x < _min) ? _min : ((x > _max) ? _max : x); }
 	// 计算插值：t为[0,1]之间的数值
-	inline float interp(float left, float right, float t) const { return left + (right - left) * t; }
-	inline int dbcmp(float x) const {
-		if (x > EPS)	return 1;
-		else if (x < -EPS)	return -1;
-		return 0;
-	}
+	static float interp(float left, float right, float t);// { return left + (right - left) * CMID(t); }
+	static int dbcmp(float x);
 };
 
-class Vec4: public BaseMathTools {
+
+class Vec4 {
 public:
 	union {
 		float v[4];
@@ -48,8 +46,8 @@ public:
 		struct { float Red, Green, Blue, Alpha; };
 	};
 public:
-	Vec4() { x = y = z = w = 0; }
-	Vec4(float _x, float _y, float _z, float _w = 0) :x(_x), y(_y), z(_z), w(_w){}
+	Vec4() { x = y = z = 0.0f; w = 1.0f; }
+	Vec4(float _x, float _y, float _z = 0.0f, float _w = 1.0f) :x(_x), y(_y), z(_z), w(_w){}
 	~Vec4() = default;	
 	
 	//vector operate function
@@ -66,6 +64,8 @@ public:
 
 	Vec4 operator * (const Mat4& rhs) const;
 
+	Vec4 operator * (const float& f) const;
+
 	Vec4 operator / (const float& f) const;
 
 	float dot(const Vec4& rhs) const;			//dot product
@@ -76,15 +76,16 @@ public:
 
 	void normalize();					//normalize
 
-	void format();					//x/w, y/w, z/w, 将w调整为1
+	Vec4& format();					//x/w, y/w, z/w, 将w调整为1
 
 };
 
 
-class Mat4 : public BaseMathTools {
-private:
-	union{
+class Mat4 {
+public:
+	union {
 		float m[4][4];
+		float mm[16];
 		struct {
 			float m00, m01, m02, m03;
 			float m10, m11, m12, m13;
@@ -113,13 +114,18 @@ public:
 
 	Mat4 operator * (const float& f) const;
 
+	bool matrix_inv();				//逆矩阵
+	void matrix_transpose();		//转置矩阵
+	
+	bool matrix_inv_traspose();		//逆转置
+
 	void set_identity();	//设置单位矩阵
 	void set_zero();		//矩阵归零
 
 	void set_translate(const float& x, const float& y, const float& z);						//平移变换
 	void set_scale(const float& x, const float& y, const float& z);							//缩放变换
 	void set_rotate(const float& x, const float& y, const float& z, const float& theta);	//旋转变换
-	
+	void set_screen_project(const float& width, const float& height);						//将CVV投影到屏幕
 
 	/**
 	*设置摄像机
@@ -141,4 +147,5 @@ public:
 	void set_perspective(const float& fovy, const float& aspect, const float& zn, const float& zf);
 
 };
+
 #endif

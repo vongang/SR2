@@ -45,6 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>./Dependencis/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -68,18 +69,42 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CONFIG.h" />
     <ClInclude Include="Device.h" />
-    <ClInclude Include="gmath.h" />
+    <ClInclude Include="Gmath.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Device.cpp" />
-    <ClCompile Include="gmath.cpp" />
+    <ClCompile Include="Gmath.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bbox.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="box.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="bunny.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="dog.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="monkey.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="monkey2.obj">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

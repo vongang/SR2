@@ -1,10 +1,22 @@
 #include "gmath.h"
 
+
+const double Math::EPS = 1e-5;
+
+float Math::CMID(float x, float _min, float _max)  { return (x < _min) ? _min : ((x > _max) ? _max : x); }
+float Math::interp(float left, float right, float t) { return left + (right - left) * CMID(t); }
+int Math::dbcmp(float x) {
+	if (x > EPS)	return 1;
+	else if (x < -EPS)	return -1;
+	return 0;
+}
+
+
 Vec4 Vec4::interp(const Vec4& rhs, const float& t) const {
 	Vec4 temp;
-	temp.x = BaseMathTools::interp(x, rhs.x, t);
-	temp.y = BaseMathTools::interp(y, rhs.y, t);
-	temp.z = BaseMathTools::interp(z, rhs.z, t);
+	temp.x = Math::interp(x, rhs.x, t);
+	temp.y = Math::interp(y, rhs.y, t);
+	temp.z = Math::interp(z, rhs.z, t);
 	temp.w = 1.0f;
 	return std::move(temp);
 }
@@ -24,7 +36,7 @@ Vec4 Vec4::operator - (const Vec4& rhs) const {
 }
 
 Vec4 Vec4::operator / (const float& f) const {
-	Vec4 temp(x / f, y / f, z / f, 1.0f);
+	Vec4 temp(x / f, y / f, z / f, w);
 	return std::move(temp);	
 }
 
@@ -43,13 +55,18 @@ Vec4 Vec4::cross(const Vec4& rhs) const {
 
 void Vec4::normalize() {
 	float v_len = length();
-	if (BaseMathTools::dbcmp(v_len) == 0)	return;
+	if (Math::dbcmp(v_len) == 0)	return;
 	x /= v_len;
 	y /= v_len;
 	z /= v_len;
 }
 
-Vec4 Vec4::operator*(const Mat4& rhs) const {
+Vec4 Vec4::operator * (const float& f) const {
+	Vec4 temp(x * f, y * f, z * f, w);
+	return std::move(temp);
+}
+
+Vec4 Vec4::operator * (const Mat4& rhs) const {
 	Vec4 tmp;
 	for (int i = 0; i < 4; ++i) {
 		float t = 0.0f;
@@ -60,11 +77,12 @@ Vec4 Vec4::operator*(const Mat4& rhs) const {
 	return std::move(tmp);
 }
 
-void Vec4::format() {
+Vec4& Vec4::format() {
 	x /= w;
 	y /= w;
 	z /= w;
 	w = 1.0;
+	return *this;
 }
 
 /*******************************************************/
@@ -184,6 +202,14 @@ void Mat4::set_rotate(const float& x, const float& y, const float& z, const floa
 
 }
 
+void Mat4::set_screen_project(const float& width, const float& height) {
+	set_identity();
+	m00 = -width;
+	m30 = width / 2.0f;
+	m11 = height;
+	m31 = height / 2.0f;
+}
+
 /**
 *ÉèÖÃÉãÏñ»ú
 *
@@ -219,7 +245,6 @@ void Mat4::set_lookat(const Vec4& eye, const Vec4& at, const Vec4& up) {
 
 	m03 = m13 = m23 = 0.0f;
 	m33 = 1.0f;
-
 }
 
 /**
@@ -231,7 +256,7 @@ void Mat4::set_lookat(const Vec4& eye, const Vec4& at, const Vec4& up) {
 *zf		Ô¶²Ã¼ôÃæÎ»ÖÃzÖµ
 */
 void Mat4::set_perspective(const float& fovy, const float& aspect, const float& zn, const float& zf){
-	float ct = 1.0f / tan(fovy * 0.5);
+	float ct = 1.0f / tan(fovy * 0.5f);
 	set_zero();
 	m00 = ct / aspect;
 	m11 = ct;
@@ -240,3 +265,146 @@ void Mat4::set_perspective(const float& fovy, const float& aspect, const float& 
 	m23 = 1.0f;
 }
 
+void Mat4::matrix_transpose() {	//×ªÖÃ¾ØÕó
+	for (int i = 0; i < 4; ++i) {
+		for (int j = i + 1; j < 4; ++j) {
+			auto tm = m[i][j];
+			m[i][j] = m[j][i];
+			m[j][i] = tm;
+		}
+	}
+}
+
+bool Mat4::matrix_inv_traspose() {		//Äæ×ªÖÃ
+	if (!matrix_inv())	return false;
+	matrix_transpose();
+	return true;
+}
+
+bool Mat4::matrix_inv(){	//Äæ¾ØÕó
+	float inv[16], det;
+	int i;
+	inv[0] = mm[5] * mm[10] * mm[15] -
+		mm[5] * mm[11] * mm[14] -
+		mm[9] * mm[6] * mm[15] +
+		mm[9] * mm[7] * mm[14] +
+		mm[13] * mm[6] * mm[11] -
+		mm[13] * mm[7] * mm[10];
+
+	inv[4] = -mm[4] * mm[10] * mm[15] +
+		mm[4] * mm[11] * mm[14] +
+		mm[8] * mm[6] * mm[15] -
+		mm[8] * mm[7] * mm[14] -
+		mm[12] * mm[6] * mm[11] +
+		mm[12] * mm[7] * mm[10];
+
+	inv[8] = mm[4] * mm[9] * mm[15] -
+		mm[4] * mm[11] * mm[13] -
+		mm[8] * mm[5] * mm[15] +
+		mm[8] * mm[7] * mm[13] +
+		mm[12] * mm[5] * mm[11] -
+		mm[12] * mm[7] * mm[9];
+
+	inv[12] = -mm[4] * mm[9] * mm[14] +
+		mm[4] * mm[10] * mm[13] +
+		mm[8] * mm[5] * mm[14] -
+		mm[8] * mm[6] * mm[13] -
+		mm[12] * mm[5] * mm[10] +
+		mm[12] * mm[6] * mm[9];
+
+	inv[1] = -mm[1] * mm[10] * mm[15] +
+		mm[1] * mm[11] * mm[14] +
+		mm[9] * mm[2] * mm[15] -
+		mm[9] * mm[3] * mm[14] -
+		mm[13] * mm[2] * mm[11] +
+		mm[13] * mm[3] * mm[10];
+
+	inv[5] = mm[0] * mm[10] * mm[15] -
+		mm[0] * mm[11] * mm[14] -
+		mm[8] * mm[2] * mm[15] +
+		mm[8] * mm[3] * mm[14] +
+		mm[12] * mm[2] * mm[11] -
+		mm[12] * mm[3] * mm[10];
+
+	inv[9] = -mm[0] * mm[9] * mm[15] +
+		mm[0] * mm[11] * mm[13] +
+		mm[8] * mm[1] * mm[15] -
+		mm[8] * mm[3] * mm[13] -
+		mm[12] * mm[1] * mm[11] +
+		mm[12] * mm[3] * mm[9];
+
+	inv[13] = mm[0] * mm[9] * mm[14] -
+		mm[0] * mm[10] * mm[13] -
+		mm[8] * mm[1] * mm[14] +
+		mm[8] * mm[2] * mm[13] +
+		mm[12] * mm[1] * mm[10] -
+		mm[12] * mm[2] * mm[9];
+
+	inv[2] = mm[1] * mm[6] * mm[15] -
+		mm[1] * mm[7] * mm[14] -
+		mm[5] * mm[2] * mm[15] +
+		mm[5] * mm[3] * mm[14] +
+		mm[13] * mm[2] * mm[7] -
+		mm[13] * mm[3] * mm[6];
+
+	inv[6] = -mm[0] * mm[6] * mm[15] +
+		mm[0] * mm[7] * mm[14] +
+		mm[4] * mm[2] * mm[15] -
+		mm[4] * mm[3] * mm[14] -
+		mm[12] * mm[2] * mm[7] +
+		mm[12] * mm[3] * mm[6];
+
+	inv[10] = mm[0] * mm[5] * mm[15] -
+		mm[0] * mm[7] * mm[13] -
+		mm[4] * mm[1] * mm[15] +
+		mm[4] * mm[3] * mm[13] +
+		mm[12] * mm[1] * mm[7] -
+		mm[12] * mm[3] * mm[5];
+
+	inv[14] = -mm[0] * mm[5] * mm[14] +
+		mm[0] * mm[6] * mm[13] +
+		mm[4] * mm[1] * mm[14] -
+		mm[4] * mm[2] * mm[13] -
+		mm[12] * mm[1] * mm[6] +
+		mm[12] * mm[2] * mm[5];
+
+	inv[3] = -mm[1] * mm[6] * mm[11] +
+		mm[1] * mm[7] * mm[10] +
+		mm[5] * mm[2] * mm[11] -
+		mm[5] * mm[3] * mm[10] -
+		mm[9] * mm[2] * mm[7] +
+		mm[9] * mm[3] * mm[6];
+
+	inv[7] = mm[0] * mm[6] * mm[11] -
+		mm[0] * mm[7] * mm[10] -
+		mm[4] * mm[2] * mm[11] +
+		mm[4] * mm[3] * mm[10] +
+		mm[8] * mm[2] * mm[7] -
+		mm[8] * mm[3] * mm[6];
+
+	inv[11] = -mm[0] * mm[5] * mm[11] +
+		mm[0] * mm[7] * mm[9] +
+		mm[4] * mm[1] * mm[11] -
+		mm[4] * mm[3] * mm[9] -
+		mm[8] * mm[1] * mm[7] +
+		mm[8] * mm[3] * mm[5];
+
+	inv[15] = mm[0] * mm[5] * mm[10] -
+		mm[0] * mm[6] * mm[9] -
+		mm[4] * mm[1] * mm[10] +
+		mm[4] * mm[2] * mm[9] +
+		mm[8] * mm[1] * mm[6] -
+		mm[8] * mm[2] * mm[5];
+
+	det = mm[0] * inv[0] + mm[1] * inv[4] + mm[2] * inv[8] + mm[3] * inv[12];
+
+	if (det == 0.0f)
+		return false;
+
+	det = 1.0f / det;
+
+	for (i = 0; i < 16; i++)
+		this->mm[i] = inv[i] * det;
+
+	return true;
+}
