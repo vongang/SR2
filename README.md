@@ -18,7 +18,7 @@ As we all know, 3D rendering pipeline is an huge project, and it includes so man
  
 ### Example
 
-![Bunny](./bunny.fig)
+![Bunny](./bunny.gif)
 
 ### Reference
 \[1\] https://www.davrous.com/2013/06/13/tutorial-series-learning-how-to-write-a-3d-soft-engine-from-scratch-in-c-typescript-or-javascript/
