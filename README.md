@@ -17,6 +17,11 @@ As we all know, 3D rendering pipeline is an huge project, and it includes so man
    - ray tracing
    
    #### Reference
+   [1] https://www.davrous.com/2013/06/13/tutorial-series-learning-how-to-write-a-3d-soft-engine-from-scratch-in-c-typescript-or-javascript/
+   [2] https://en.wikipedia.org/wiki/Transformation_matrix
+   [3] http://www.stroustrup.com/C++11FAQ.html
+   [4] https://en.wikipedia.org/wiki/Back-face_culling
+   
    [1]:https://www.davrous.com/2013/06/13/tutorial-series-learning-how-to-write-a-3d-soft-engine-from-scratch-in-c-typescript-or-javascript/ "??"
    [2]:https://en.wikipedia.org/wiki/Transformation_matrix
    [3]:http://www.stroustrup.com/C++11FAQ.html
