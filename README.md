@@ -11,7 +11,7 @@ As we all know, 3D rendering pipeline is an huge project, and it includes so man
   - Flat shading *in the branch s5*
   - Gouraud shading and back-face culling *in the branch s6*
   
-  + TODO
++ TODO
    - Anti-Aliased
    - Texture
    - ray tracing
