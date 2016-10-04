@@ -17,13 +17,14 @@ float rotate_theta = 0.0f;
 
 Util util;
 Camera camera;
+Light light;
 std::shared_ptr<Device> g_device(new Device(window_width, window_height));
 std::vector<std::shared_ptr<Mesh>> g_mesh;
 std::chrono::time_point<std::chrono::high_resolution_clock> m_time_begin;
 
 void initScene(){
 	auto mesh = std::make_shared<Mesh>();
-	if (!util.LoadOBJ("bunny.obj", mesh.get())){
+	if (!util.LoadOBJ("Models/bunny.obj", mesh.get())){
 		_asm{
 			int 3;
 		}
@@ -34,6 +35,9 @@ void initScene(){
 	Vec4 eye(0.0f, 0.0f, 10.0f);
 	Vec4 at(0.0f, 0.0f, 0.0f);
 	camera = Camera(eye, at);
+
+	light.add(Vec4(5.0f, 5.0f, 5.0f));
+	//light.add(Vec4(0.0f, 10.0f, 10.0f));
 }
 
 void display(){
@@ -47,13 +51,13 @@ void display(){
 
 	g_device->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
-	g_device->render(g_mesh, camera);
+	g_device->render(g_mesh, camera, light);
 
 	rotate_theta += 0.02;
 
-	double time_count = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - m_time_begin).count();
-	time_count = 1.0 / time_count * 1000000.0;
-	//printf("FPS %.2f\n", time_count);
+	double time_count = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_time_begin).count();
+	time_count = 1.0 / time_count * 1000.0;
+	printf("FPS %.3f\n", time_count);
 
 	glutSwapBuffers();
 }

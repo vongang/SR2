@@ -87,22 +87,22 @@
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="bbox.obj">
+    <None Include="Models\bbox.obj">
       <FileType>Document</FileType>
     </None>
-    <None Include="box.obj">
+    <None Include="Models\box.obj">
       <FileType>Document</FileType>
     </None>
-    <None Include="bunny.obj">
+    <None Include="Models\bunny.obj">
       <FileType>Document</FileType>
     </None>
-    <None Include="dog.obj">
+    <None Include="Models\dog.obj">
       <FileType>Document</FileType>
     </None>
-    <None Include="monkey.obj">
+    <None Include="Models\monkey.obj">
       <FileType>Document</FileType>
     </None>
-    <None Include="monkey2.obj">
+    <None Include="Models\monkey2.obj">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
