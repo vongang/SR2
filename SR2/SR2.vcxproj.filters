@@ -36,6 +36,9 @@
     <ClInclude Include="CONFIG.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -59,5 +62,25 @@
     <ClCompile Include="Gmath.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bbox.obj">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="box.obj">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="bunny.obj">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="dog.obj">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="monkey.obj">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="monkey2.obj">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>
