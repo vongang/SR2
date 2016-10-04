@@ -34,15 +34,16 @@ class Mesh : public Object
 	
 public:
 	std::string name;
-	Vec4* vertices;
-	Vec4* normals;
-	Face* faces;
-	uint32 vt_count;
-	uint32 face_count;
+	Vec4* vertices;			//顶点位置
+	Vec4* normals;			//法线
+	Face* faces;			//面
+	uint32 vt_count;		//顶点个数
+	uint32 face_count;		//面个数
 
 	Mesh();
-	Mesh(std::string _name, int vt_count);
-	Mesh(std::string _name, int vt_count, int face_count);
+	Mesh(std::string& _name, const uint32& _vt_count);
+	Mesh(std::string& _name, const uint32& _vt_count, const uint32& _face_count);
+	void set(std::string& _name, const uint32& _vt_count, const uint32& _face_count);
 	~Mesh();
 };
 

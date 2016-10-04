@@ -176,13 +176,23 @@ void Device::drawTriangle(Vertex& v0, Vertex& v1, Vertex& v2, const Color& clr) 
 	Vec4 vn_face = (v0.normal + v1.normal + v2.normal) / 3;
 	Vec4 center_point = (v0.world_coordiante + v1.world_coordiante + v2.world_coordiante) / 3;
 
-	Vec4 light_pos(0.0f, 10.0f, 10.0f);
+	if (!backCullingCheck(vn_face, sr.camera->position - center_point))	return;
 
-	if (!backCullingCheck(vn_face, Vec4(0.0f, 0.0f, 10.0f) - center_point))	return;
+	//Vec4 light_pos(0.0f, 10.0f, 10.0f);
 
-	float n_dot_l_0 = computeNDotL(v0.world_coordiante, v0.normal, light_pos);
-	float n_dot_l_1 = computeNDotL(v1.world_coordiante, v1.normal, light_pos);
-	float n_dot_l_2 = computeNDotL(v2.world_coordiante, v2.normal, light_pos);
+	float n_dot_l_0 = 0.0f;
+	float n_dot_l_1 = 0.0f;
+	float n_dot_l_2 = 0.0f;
+
+	for (auto light_pos : sr.light->light_arr) {
+		n_dot_l_0 = std::max(n_dot_l_0, computeNDotL(v0.world_coordiante, v0.normal, light_pos));
+		n_dot_l_1 = std::max(n_dot_l_1, computeNDotL(v1.world_coordiante, v1.normal, light_pos));
+		n_dot_l_2 = std::max(n_dot_l_2, computeNDotL(v2.world_coordiante, v2.normal, light_pos));
+	}
+	//size_t avg = sr.light->light_arr.size();
+	//n_dot_l_0 /= float(avg);
+	//n_dot_l_1 /= float(avg);
+	//n_dot_l_2 /= float(avg);
 
 
 	ScanLineData sld;
@@ -230,14 +240,14 @@ void Device::drawCoordinate() {
 	//auto px2 = project(p2, transform.transform_matrix);
 	//auto px3 = project(p3, transform.transform_matrix);
 
-	//drawTriangle(px0, px0, px1, Color(1.0f, 0.0f, 0.0f));
-	//drawTriangle(px0, px0, px2, Color(.0f, 1.0f, 0.0f));
-	//drawTriangle(px0, px0, px3, Color(.0f, 0.0f, 1.0f));
+	////drawTriangle(px0, px0, px1, Color(1.0f, 0.0f, 0.0f));
+	////drawTriangle(px0, px0, px2, Color(.0f, 1.0f, 0.0f));
+	////drawTriangle(px0, px0, px3, Color(.0f, 0.0f, 1.0f));
 
 
-	/*drawBLine(px0, px1, Color(1.0f, 0.0f, 0.0f));
-	drawBLine(px0, px2, Color(0.0f, 1.0f, 0.0f));
-	drawBLine(px0, px3, Color(0.0f, 0.0f, 1.0f));*/
+	//drawBLine(px0, px1, Color(1.0f, 0.0f, 0.0f));
+	//drawBLine(px0, px2, Color(0.0f, 1.0f, 0.0f));
+	//drawBLine(px0, px3, Color(0.0f, 0.0f, 1.0f));
 }
 
 void Device::drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, const uint32& end_index){
@@ -272,16 +282,19 @@ void Device::drawFace(std::shared_ptr<Mesh>& mesh, const uint32& start_index, co
 	}
 }
 	
-void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera) {
+void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& camera, const Light& light) {
 	transform.view_matrix.set_lookat(camera.position, camera.at, camera.up);
+	
 	transform.projection_matrix.set_perspective(0.78f, float(width) / height, 0.01f, 1.0f);
+	
 	transform.screen_project_matrix.set_screen_project(width, height);
+	
 	transform.world_matrix.set_identity();
 	
 	transform.update();
 
 	//drawCoordinate();
-
+	sr.set(camera, light);
 	
 	bool flag = true;
 	for (auto mesh : g_mesh) {
@@ -289,18 +302,16 @@ void Device::render(std::vector<std::shared_ptr<Mesh>>& g_mesh, const Camera& ca
 		transform.world_matrix = mesh->translate_matrix * mesh->rotation_matrix;
 
 		transform.update();
-		int seg = (mesh->face_count + THREAD_COUNT) / THREAD_COUNT;
+		
 #ifdef MULTI_PROCESS
 		threads.clear();
-		
+		int seg = (mesh->face_count + THREAD_COUNT) / THREAD_COUNT;
 		for (int i = 0; i < THREAD_COUNT; ++i) {
 			threads.push_back(std::thread(std::bind(&Device::drawFace, this, mesh, i*seg, (i + 1)*seg))); //********类的成员函数传入std::thread要用std::bind********
 		}
 		std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 #else
-		for (int i = 0; i < THREAD_COUNT; ++i) {
-			drawFace(mesh, i*seg, (i + 1)*seg);	
-		}
+		drawFace(mesh, 0, mesh->face_count);
 #endif
 	}  
 	glDrawPixels(width, height, GL_RGBA, GL_FLOAT, framebuff);

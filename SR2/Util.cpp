@@ -22,7 +22,6 @@ bool Util::LoadOBJ(const char* path, Mesh* mesh) {
 			temp_vertices.push_back(vertex);
 		}
 		else if (strcmp(line_header, "vn") == 0){
-			//cout << "Get vn" << endl;
 			Vec4 normal;
 			fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
 			normal.w = 0.0f;
@@ -50,25 +49,15 @@ bool Util::LoadOBJ(const char* path, Mesh* mesh) {
 		return false;
 	}
 
-	uint32 _vt_count = static_cast<uint32>(temp_vertices.size());
-	uint32 _face_count = static_cast<uint32>(temp_faces.size());
-	
-	mesh->vertices = new Vec4[_vt_count];
-	mesh->normals = new Vec4[_vt_count];
-	mesh->faces = new Face[_face_count];
+	mesh->set(std::string(path), temp_vertices.size(), temp_faces.size());
 
-	mesh->name = path;
-	mesh->vt_count = _vt_count;
-	mesh->face_count = _face_count;
-
-	Face* out_faces = mesh->faces;
 	uint32 i, j = 0;
-	for (i = 0; i < _vt_count; ++i) {
+	for (i = 0; i < mesh->vt_count; ++i) {
 		mesh->vertices[i] = temp_vertices[i];
 		mesh->normals[i] = temp_normals[i];
 	}
 
-	for_each(temp_faces.begin(), temp_faces.end(), [&j, out_faces](Face& fc){out_faces[j] = fc; ++j; });
+	for_each(temp_faces.begin(), temp_faces.end(), [&](Face& fc){mesh->faces[j] = fc; ++j; });
 	
 	printf("vertices number: %d, faces number: %d\n", i, j);
 	return true;
