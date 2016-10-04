@@ -1,6 +1,6 @@
 #SR2
 
-As we all know, 3D rendering pipeline is an huge project, and it includes so many parts. And here I implemented an 3D software rendering toy. This project was inspired by ![\[1\]][1]. Lots of documents was used like [\[2\]][2] [\[3\]][3] [\[4\]][4] and so on. I coded it in 5 days. All of things I had done and will do is shown in the list
+As we all know, 3D rendering pipeline is an huge project, and it includes so many parts. And here I implemented an 3D software rendering toy. This project was inspired by [\[1\]][1]. Lots of documents was used like [\[2\]][2] [\[3\]][3] [\[4\]][4] and so on. I coded it in 5 days. All of things I had done and will do is shown in the list
 
 + Done
   - Basic environment: including the mathematics lib(especially vector and matrix), display functions and the like. *in the branch s1*
@@ -17,7 +17,7 @@ As we all know, 3D rendering pipeline is an huge project, and it includes so man
    - ray tracing
    
    #### Reference
-   [1]:https://www.davrous.com/2013/06/13/tutorial-series-learning-how-to-write-a-3d-soft-engine-from-scratch-in-c-typescript-or-javascript/ 
+   [1]:https://www.davrous.com/2013/06/13/tutorial-series-learning-how-to-write-a-3d-soft-engine-from-scratch-in-c-typescript-or-javascript/ "[1]:https://www.davrous.com/2013/06/13/tutorial-series-learning-how-to-write-a-3d-soft-engine-from-scratch-in-c-typescript-or-javascript/"
    [2]:https://en.wikipedia.org/wiki/Transformation_matrix
    [3]:http://www.stroustrup.com/C++11FAQ.html
    [4]:https://en.wikipedia.org/wiki/Back-face_culling
